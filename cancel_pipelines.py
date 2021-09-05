@@ -49,6 +49,7 @@ def main():
     parser.add_argument(
         "project_path", help="Project path, such as: somegroup/someproject"
     )
+    parser.add_argument("--dry-run", action="store_true")
     options = parser.parse_args()
     config = load_config()
     if not config:
@@ -70,8 +71,9 @@ def main():
             data = response.json()
             if data.get("user", {}).get("username") == config.USERNAME:
                 print(f"Cancelling pipeline #{data['id']} ...")
-                response = sess.post(f"{pipeline_url}/cancel")
-                response.raise_for_status()
+                if not options.dry_run:
+                    response = sess.post(f"{pipeline_url}/cancel")
+                    response.raise_for_status()
                 pipeline_cancelled = True
     if not pipeline_cancelled:
         print("No pipeline to cancel.")
